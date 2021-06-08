@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: toc-web
+server:
+  servlet:
+    context-path: /toc-web

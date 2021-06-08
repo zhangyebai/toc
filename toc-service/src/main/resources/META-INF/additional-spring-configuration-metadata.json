@@ -1,0 +1,14 @@
+{
+  "properties": [
+    {
+      "name": "spring.application.instance",
+      "type": "java.lang.String",
+      "description": "service instance unique id for multi services."
+    },
+    {
+      "name": "spring.redis.queue",
+      "type": "java.lang.String",
+      "description": "delay queue in redis for timeout."
+    }
+  ]
+}
