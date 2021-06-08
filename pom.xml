@@ -14,7 +14,7 @@
     </modules>
     <name>toc</name>
     <packaging>pom</packaging>
-    <description>toc for wusong platform</description>
+    <description>toc</description>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
