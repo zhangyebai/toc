@@ -6,6 +6,9 @@ import com.zyb.toc.service.domain.po.DelayTaskPo;
 import com.zyb.toc.service.domain.po.TaskQueryPo;
 import com.zyb.toc.service.function.TransactionMixer;
 import com.zyb.toc.service.processor.ITaskProcessor;
+import com.zyb.toc.service.service.ICallbackService;
+import com.zyb.toc.service.utils.JsonUtil;
+import com.zyb.toc.spi.domain.CallbackBo;
 import com.zyb.toc.spi.domain.enums.LocationEnum;
 import com.zyb.toc.spi.domain.enums.StatusEnum;
 import lombok.extern.slf4j.Slf4j;
@@ -54,6 +57,13 @@ public class TaskScanScheduler {
         return this;
     }
 
+    private ICallbackService callbackService;
+    @Autowired
+    public TaskScanScheduler setCallbackService(ICallbackService callbackService) {
+        this.callbackService = callbackService;
+        return this;
+    }
+
     @Scheduled(fixedDelay = 300000)
     public void scan(){
         final var now = LocalDateTime.now();
@@ -72,6 +82,7 @@ public class TaskScanScheduler {
         }
     }
 
+    @SuppressWarnings(value = "all")
     public void transform(TaskEntity entity){
         final var now = LocalDateTime.now();
         final long delay = ChronoUnit.SECONDS.between(now, entity.getTts());
@@ -79,7 +90,7 @@ public class TaskScanScheduler {
             entity.setStatus(StatusEnum.TIMEOUT.getStatus()).setLocation(LocationEnum.RECORD.getLocation());
             final var recordEntity = TaskConverter.entity2record(entity);
             transactionMixer.actionProxy(() -> taskProcessor.delete(entity), () -> taskProcessor.save(recordEntity));
-            //TODO : callback message
+            callbackService.callbackAsync(recordEntity, JsonUtil.parseObject(entity.getCallback(), CallbackBo.class));
         }else{
             redisStreamProducerConsumer.tryEmitNext(new DelayTaskPo().setTaskId(entity.getTaskId()).setDelay(delay).setTimestamp(System.currentTimeMillis()));
             entity.setLocation(LocationEnum.REDIS.getLocation()).setStatus(StatusEnum.REDIS.getStatus()).setUts(now);
