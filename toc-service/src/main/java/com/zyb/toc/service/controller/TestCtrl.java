@@ -3,6 +3,7 @@ package com.zyb.toc.service.controller;
 import org.redisson.api.RDelayedQueue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Random;
@@ -20,5 +21,12 @@ public class TestCtrl {
         final var timeout = new Random().nextInt(20) + 1L;
         delayedQueue.offer(id, timeout, TimeUnit.SECONDS);
         return id + " : " + timeout + " seconds";
+    }
+
+
+    @GetMapping(value = "/test/callback/{any}")
+    public String testCallback(@PathVariable(value = "any") String any){
+        final var timeout = new Random().nextInt(20) + 1L;
+        return any + " : " + timeout + " seconds";
     }
 }
